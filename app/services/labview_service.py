@@ -27,11 +27,33 @@ class LabVIEWService(QObject):  # <-- MUST INHERIT FROM QObject
         cmd = f'"{self.lv_shortcut}" "{self.vi_file}"'
         try:
             p = subprocess.Popen(cmd, shell=True)
+            self.lv_process = p
             self.logger.info("Launched LabVIEW VI")
             return p
         except Exception as e:
             self.logger.error(f"Failed to launch VI: {e}")
             return None
+        
+    def stop(self):
+        self.logger.info("STOP requested - cleaning up LabVIEW resources")
+
+        #worker thread
+        if self.current_worker and self.current_worker.isRunning():
+            self.logger.info("Terminating LabVIEWWorker thread...")
+            self.current_worker.terminate()
+            self.current_worker.wait(3000)
+            self.current_worker(None)
+
+        #LabVIEW VI process:-
+        if self.lv_process:
+            try:
+                self.logger.info("Terminating LabVIEW VI process...")
+                self.lv_process.terminate()
+                self.lv_process.wait(5000)
+            except Exception as e:
+                self.logger.error(f"Failed to kill LabVIEW process: {e}")
+            finally:
+                self.lv_process=None
 
     def send_base_config(self, base_config):
         ini_message = self._build_ini_message(base_config)

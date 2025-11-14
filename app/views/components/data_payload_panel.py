@@ -2,9 +2,11 @@ from PySide6.QtWidgets import (
     QGroupBox, QHBoxLayout, QVBoxLayout, QLabel, QLineEdit,
     QSpinBox, QPushButton, QWidget, QSizePolicy
 )
-from PySide6.QtCore import Qt, Slot
+from PySide6.QtCore import Qt, Slot, Signal
 
 class DataPayloadPanel(QGroupBox):
+    stop_clicked = Signal()
+
     def __init__(self):
         super().__init__("DATA PANEL")
         self.setLayout(QVBoxLayout())
@@ -54,7 +56,10 @@ class DataPayloadPanel(QGroupBox):
         
         # Send buttons
         self.send_once_btn = QPushButton("SEND")
+        self.stop_btn = QPushButton("STOP")
+        self.stop_btn.setStyleSheet("color:black;")
         action_row.addWidget(self.send_once_btn)
+        action_row.addWidget(self.stop_btn)
         # self.send_cyclic_btn = QPushButton("Send Cyclic")
         # action_row.addWidget(self.send_cyclic_btn)
 
@@ -88,6 +93,7 @@ class DataPayloadPanel(QGroupBox):
     def __connect_signals(self):
         self.data_length.valueChanged.connect(self._on_length_changed)
         self.data.textChanged.connect(self._on_data_changed)
+        self.stop_btn.clicked.connect(self.stop_clicked)
 
     @Slot()
     def _on_length_changed(self):

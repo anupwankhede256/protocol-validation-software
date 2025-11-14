@@ -46,7 +46,9 @@ class MainController:
             self._on_test_case_changed(current_tc)
         except Exception:
             logger.debug('Could not initialize test case dependent UI')
-
+        
+        main_window.payload_panel.stop_clicked.connect(self.backend.labview.stop)
+        main_window.payload_panel.stop_clicked.connect(lambda:self.log_status("LabVIEW"))
     def _on_labview_full_response(self, full_response: str):
         """Called when LabVIEW sends full response (for normal tests)"""
         if not self.current_base_config:
