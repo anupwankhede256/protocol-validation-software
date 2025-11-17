@@ -35,27 +35,64 @@ class I2CService:
     def send_payload(self, payload_config: I2CPayloadConfig):
         ini_message = self._build_ini_message(payload_config)
         return self._send_ini_message(ini_message, self.send_port)
-    
     def _split_register_address(self, register_address: str, register_size: int) -> str:
-        """Split 16-bit register address into two 8-bit addresses if needed."""
+        """
+        Convert register address(es) into LabVIEW-compatible format.
+        - Single address (8-bit):  '0xAB'
+        - Single address (16-bit): '0xAB', '0xCD'
+        - Multiple addresses:     '0xFA', '0xFB', '0xFC'
+        """
         if not register_address:
             return ""
+
+        # Split by whitespace and clean up
+        addr_tokens = [token.strip().lower() for token in register_address.split() if token.strip()]
         
-        # Remove 0x prefix and ensure lowercase
-        addr = register_address.lower().replace('0x', '')
+        formatted = []
+        for token in addr_tokens:
+            if not token.startswith('0x'):
+                token = '0x' + token
+            
+            # Remove 0x prefix for processing
+            hex_part = token[2:]
+            
+            if register_size == 16:
+                # Pad to 4 hex digits and split into high/low
+                hex_part = hex_part.zfill(4)
+                high = '0x' + hex_part[:2].upper()
+                low = '0x' + hex_part[2:].upper()
+                formatted.extend([high, low])
+            else:
+                # 8-bit: pad to 2 digits
+                hex_part = hex_part.zfill(2)
+                formatted.append('0x' + hex_part.upper())
+
+        # Join with comma and space, wrapped in quotes
+        quoted = [f"'{x}'" for x in formatted]
+        result = ", ".join(quoted)
         
-        if register_size == 16:
-            # For 16-bit, ensure we have 4 digits and split into two 8-bit values
-            addr = addr.zfill(4)  # Pad with leading zeros if needed
-            high_byte = addr[:2]
-            low_byte = addr[2:]
-            self.logger.info(f"Splitting 16-bit address {register_address} into high: 0x{high_byte}, low: 0x{low_byte}")
-            return f"'0x{high_byte}', '0x{low_byte}'"  # Return as '0xHH', '0xLL' with space for readability
+        self.logger.info(f"Formatted register address: {register_address} → {result}")
+        return result
+    # def _split_register_address(self, register_address: str, register_size: int) -> str:
+    #     """Split 16-bit register address into two 8-bit addresses if needed."""
+    #     if not register_address:
+    #         return ""
         
-        # For 8-bit, ensure we have 2 digits
-        addr = addr.zfill(2)
-        self.logger.info(f"Using 8-bit address: 0x{addr}")
-        return f"'0x{addr}'"  # Return as '0xBB'
+    #     # Remove 0x prefix and ensure lowercase
+    #     addr = register_address.lower().replace('0x', '')
+        
+    #     if register_size == 16:
+    #         # For 16-bit, ensure we have 4 digits and split into two 8-bit values
+    #         addr = addr.zfill(4)  # Pad with leading zeros if needed
+    #         high_byte = addr[:2]
+    #         low_byte = addr[2:]
+    #         self.logger.info(f"Splitting 16-bit address {register_address} into high: 0x{high_byte}, low: 0x{low_byte}")
+    #         return f"'0x{high_byte}', '0x{low_byte}'"  # Return as '0xHH', '0xLL' with space for readability
+        
+    #     # For 8-bit, ensure we have 2 digits
+    #     addr = addr.zfill(2)
+    #     self.logger.info(f"Using 8-bit address: 0x{addr}")
+    #     return f"'0x{addr}'"  # Return as '0xBB'
 
     # def _split_register_address(self, register_address: str, register_size: int) -> str:
     #     """Split 16-bit register address into two 8-bit addresses if needed."""
