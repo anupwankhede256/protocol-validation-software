@@ -59,17 +59,16 @@ class I2CService:
             if register_size == 16:
                 # Pad to 4 hex digits and split into high/low
                 hex_part = hex_part.zfill(4)
-                high = '0x' + hex_part[:2].upper()
-                low = '0x' + hex_part[2:].upper()
+                high = hex_part[:2].upper()
+                low = hex_part[2:].upper()
                 result_parts.extend([f"'0xhigh'",f"'0xlow'"])
             else:
                 # 8-bit: pad to 2 digits
                 hex_part = hex_part.zfill(2)
-                result_parts.append('0x' + hex_part.upper())
+                result_parts.append(f"'0x{hex_part.upper()}'")
 
         # Join with comma and space, wrapped in quotes
         final_result = ", ".join(result_parts)
-        final_result=final_result.replace("'","'")
         self.logger.info(f"register_address input: '{register_address}' → LabVIEW format: {final_result}")
         return final_result
     # def _split_register_address(self, register_address: str, register_size: int) -> str:
