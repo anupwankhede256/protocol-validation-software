@@ -197,16 +197,16 @@ class I2CService:
 
         return "\n".join(lines)
     
-    def _format_register_address(self, address_str: str) -> str:
-        # Split by spaces
-        tokens = address_str.strip().split()
-        formatted_tokens = []
-        for t in tokens:
-            t = t.upper()
-            if not t.startswith('0x'):
-                t = '0x' + t
-            formatted_tokens.append(t)
-        return','.join(formatted_tokens)
+    # def _format_register_address(self, address_str: str) -> str:
+    #     # Split by spaces
+    #     tokens = address_str.strip().split()
+    #     formatted_tokens = []
+    #     for t in tokens:
+    #         t = t.upper()
+    #         if not t.startswith('0x'):
+    #             t = '0x' + t
+    #         formatted_tokens.append(t)
+    #     return','.join(formatted_tokens)
 
 
     def _send_ini_message(self, message, port):
