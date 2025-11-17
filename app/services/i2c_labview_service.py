@@ -69,6 +69,7 @@ class I2CService:
 
         # Join with comma and space, wrapped in quotes
         final_result = ", ".join(result_parts)
+        final_result=final_result.replace("'","'")
         self.logger.info(f"register_address input: '{register_address}' → LabVIEW format: {final_result}")
         return final_result
     # def _split_register_address(self, register_address: str, register_size: int) -> str:
