@@ -42,16 +42,16 @@ class I2CService:
         - Single address (16-bit): '0xAB', '0xCD'
         - Multiple addresses:     '0xFA', '0xFB', '0xFC'
         """
-        if not register_address:
+        if not register_address or not register_address.strip():
             return ""
 
         # Split by whitespace and clean up
-        addr_tokens = [token.strip().lower() for token in register_address.split() if token.strip()]
-        
-        formatted = []
-        for token in addr_tokens:
+        tokens = [token.strip().lower() for token in register_address.split() if token.strip()]
+        result_parts = []
+
+        for token in tokens:
             if not token.startswith('0x'):
-                token = '0x' + token
+                token = '0x' + token.lstrip('0')
             
             # Remove 0x prefix for processing
             hex_part = token[2:]
@@ -61,18 +61,16 @@ class I2CService:
                 hex_part = hex_part.zfill(4)
                 high = '0x' + hex_part[:2].upper()
                 low = '0x' + hex_part[2:].upper()
-                formatted.extend([high, low])
+                result_parts.extend([f"'0xhigh'",f"'0xlow'"])
             else:
                 # 8-bit: pad to 2 digits
                 hex_part = hex_part.zfill(2)
-                formatted.append('0x' + hex_part.upper())
+                result_parts.append('0x' + hex_part.upper())
 
         # Join with comma and space, wrapped in quotes
-        quoted = [f"'{x}'" for x in formatted]
-        result = ", ".join(quoted)
-        
-        self.logger.info(f"Formatted register address: {register_address} → {result}")
-        return result
+        final_result = ", ".join(result_parts)
+        self.logger.info(f"register_address input: '{register_address}' → LabVIEW format: {final_result}")
+        return final_result
     # def _split_register_address(self, register_address: str, register_size: int) -> str:
     #     """Split 16-bit register address into two 8-bit addresses if needed."""
     #     if not register_address:
